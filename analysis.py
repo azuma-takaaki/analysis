@@ -60,9 +60,20 @@ def analyze_data(file_path):
     ####↓タイムスタンプをファイル名にしたファイルを作成し， データを書き込む↓
     with open(analytical_file,'a') as f:
         writer = csv.writer(f)
-        writer.writerow([file_path,str(average)])
+        writer.writerow([file_path,str(average),str(len(all_arr))])
     ####↑タイムスタンプをファイル名にしたファイルを作成し， データを書き込む↑
 
+    return all_arr
+
+
+def write_spss_file(data):
+    analytical_file = 'analytical_data/'+"spss_"+ str(datetime.now(timezone('Asia/Tokyo')))+'.csv'
+
+    with open(analytical_file,'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(['sub_num','amp0','amp0.5','amp1','amp1.5','amp2.0','amp2.5'])
+        for i in range(len(data)):
+            writer.writerow(['sub'+str(i+1), data[i][0], data[i][1], data[i][2], data[i][3], data[i][4], data[i][5]])
 
 
 
@@ -73,7 +84,7 @@ analytical_file = 'analytical_data/'+str(datetime.now(timezone('Asia/Tokyo')))+'
 
 with open(analytical_file,'a') as f:
     writer = csv.writer(f)
-    writer.writerow(['file_name','average_cof'])
+    writer.writerow(['file_name','average_cof', 'amount_of_data'])
 
 
 
@@ -81,19 +92,42 @@ with open(analytical_file,'a') as f:
 amp_order = ['0', '0.5', '1', '1.5', '2', '2.5']
 sub_num = 10
 file_names = []
+
+
+#spssにかけるデータの配列を用意
+average_datas = [[0, 0, 0, 0, 0, 0]  for i in range(10)]
+
+
 #sub1から10まで順番にファイルパスを取得
+five_times_data = []
 for i in range(sub_num):
     for l in range(len(amp_order)):
         file = glob.glob("data/sub" + str(i+1) + "_amp_" + amp_order[l] + '_*')
         file_names.append(file)
+        for n in range(len(file)):
+            five_times_data.append(analyze_data(file[n]))
+        connected_data = list(itertools.chain.from_iterable(five_times_data))
+        five_average = sum(connected_data)/len(connected_data)
+        print("データ数: " +str(len(connected_data)))
+        print("平均値: " +str(five_average))
+        average_datas[i][l] = five_average
+        five_times_data = []
+
+
+
+print(average_datas)
+
+
+write_spss_file(average_datas)
 
 #二次元リストを一次元リストに変換
 file_names = list(itertools.chain.from_iterable(file_names))
 
-
+""""
 #分析
 count = 0
 for i in range(len(file_names)):
     analyze_data(file_names[i])
     count += 1
     print("分析中:" + str(count)+"/"+str(len(file_names)))
+"""
