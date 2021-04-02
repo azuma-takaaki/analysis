@@ -88,7 +88,7 @@ with open(analytical_file,'a') as f:
 
 
 
-#実験データのファイルパスを取得
+#分析に必要なデータを用意
 amp_order = ['0', '0.5', '1', '1.5', '2', '2.5']
 sub_num = 10
 file_names = []
@@ -99,21 +99,23 @@ average_datas = [[0, 0, 0, 0, 0, 0]  for i in range(10)]
 
 
 #sub1から10まで順番にファイルパスを取得
+#5試行分のデータの分析が終了したら平均値を求める
 five_times_data = []
+count = 0
 for i in range(sub_num):
     for l in range(len(amp_order)):
         file = glob.glob("data/sub" + str(i+1) + "_amp_" + amp_order[l] + '_*')
         file_names.append(file)
         for n in range(len(file)):
             five_times_data.append(analyze_data(file[n]))
+            count += 1
+            print("分析中:" + str(count)+"/300"+)
         connected_data = list(itertools.chain.from_iterable(five_times_data))
         five_average = sum(connected_data)/len(connected_data)
         print("データ数: " +str(len(connected_data)))
         print("平均値: " +str(five_average))
         average_datas[i][l] = five_average
         five_times_data = []
-
-
 
 print(average_datas)
 
@@ -122,12 +124,3 @@ write_spss_file(average_datas)
 
 #二次元リストを一次元リストに変換
 file_names = list(itertools.chain.from_iterable(file_names))
-
-""""
-#分析
-count = 0
-for i in range(len(file_names)):
-    analyze_data(file_names[i])
-    count += 1
-    print("分析中:" + str(count)+"/"+str(len(file_names)))
-"""
