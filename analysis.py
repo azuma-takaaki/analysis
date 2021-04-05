@@ -7,6 +7,42 @@ from datetime import datetime
 from pytz import timezone
 import itertools
 
+front = 0.08
+back = 0.08
+
+
+def set_front_back ():
+    global front
+    global back
+    does_input_fornt = True
+    while True:
+        print("front:" + str(front*100) + "%, back: " + str(back*100) + "%")
+        if does_input_fornt:
+            print("input 'front' percentage. if input 'd', calculate by 'default' percentage.")
+        else:
+            print("input 'back' percentage. if input 'd', calculate by 'default' percentage.")
+        tmp = input()
+        if tmp == 'd':
+            return
+        try:
+            input_p = int(tmp)
+            print(tmp)
+            if input_p <= 100 and input_p>=0:
+                if does_input_fornt:
+                    front = float(input_p)/100
+                    does_input_fornt = False
+                else:
+                    back = float(input_p)/100
+                    break
+        except ValueError:
+            print(ValueError)
+            print('input integer')
+            continue
+
+
+
+
+
 
 
 
@@ -17,8 +53,6 @@ def Rounding (x):
     return int(round)
 
 def get_middle(arr):
-    front = 0.2
-    back = 0.2
     return arr[Rounding(len(arr)*front):Rounding(len(arr)*(1-back))]
 
 def analyze_data(file_path):
@@ -67,7 +101,7 @@ def analyze_data(file_path):
 
 
 def write_spss_file(data):
-    analytical_file = 'analytical_data/'+"spss_"+ str(datetime.now(timezone('Asia/Tokyo')))+'.csv'
+    analytical_file = 'analytical_data/'+str(front*100)+ "%_"+str(back*100)+"%_"+"spss_"+ str(datetime.now(timezone('Asia/Tokyo')))+'.csv'
 
     with open(analytical_file,'a') as f:
         writer = csv.writer(f)
@@ -78,9 +112,9 @@ def write_spss_file(data):
 
 
 
-
+set_front_back ()
 #分析データを書き込むファイルを生成
-analytical_file = 'analytical_data/'+str(datetime.now(timezone('Asia/Tokyo')))+'.csv'
+analytical_file = 'analytical_data/'+str(front*100)+ "%_"+str(back*100)+"%_"+str(datetime.now(timezone('Asia/Tokyo')))+'.csv'
 
 with open(analytical_file,'a') as f:
     writer = csv.writer(f)
