@@ -109,11 +109,11 @@ for i in range(sub_num):
         for n in range(len(file)):
             five_times_data.append(analyze_data(file[n]))
             count += 1
-            print("分析中:" + str(count)+"/300"+)
+            print("分析中:" + str(count)+"/300")
         connected_data = list(itertools.chain.from_iterable(five_times_data))
         five_average = sum(connected_data)/len(connected_data)
-        print("データ数: " +str(len(connected_data)))
-        print("平均値: " +str(five_average))
+        #print("データ数: " +str(len(connected_data)))
+        #print("平均値: " +str(five_average))
         average_datas[i][l] = five_average
         five_times_data = []
 
