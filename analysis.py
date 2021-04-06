@@ -6,6 +6,9 @@ import csv
 from datetime import datetime
 from pytz import timezone
 import itertools
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
 
 front = 0.08
 back = 0.08
@@ -111,7 +114,19 @@ def write_spss_file(data):
 
 
 
+#グラフ作成のテスト
+#f_p = glob.glob("data/sub1_amp_0_us_0_no_1010.xlsx")
+#df = pd.read_excel(f_p)
+f_p = glob.glob("data/sub1_amp_0_us_0_no_1010.xlsx")
+df = pd.read_excel(f_p[0])
+plt.figure()
+df.plot()
+plt.show()
+plt.close('all')
 
+
+
+#前後何%を削除するかを入力して設定する
 set_front_back ()
 #分析データを書き込むファイルを生成
 analytical_file = 'analytical_data/'+str(front*100)+ "%_"+str(back*100)+"%_"+str(datetime.now(timezone('Asia/Tokyo')))+'.csv'
@@ -155,6 +170,3 @@ print(average_datas)
 
 
 write_spss_file(average_datas)
-
-#二次元リストを一次元リストに変換
-file_names = list(itertools.chain.from_iterable(file_names))
