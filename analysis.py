@@ -10,8 +10,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 
-front = 0.08
-back = 0.08
+front = 0.1
+back = 0.1
 
 
 def set_front_back ():
@@ -65,7 +65,7 @@ def analyze_data(file_path):
     #触った回数(t_countの最大値)の空の配列を作る
     arr_split = [[] for _ in range(max(df["t_count"]))]
 
-    #t_countごとに配列を分けて格納 → 例えばarr[1]はt_countが2の動摩擦係数データを全て取得できる．
+    #t_countごとに配列を分けて格納 → 例えばarr[1]はt_countが2の動摩擦係数時系列データを全て取得できる．
     for index, row in df.iterrows():
         arr_split[int(row["t_count"])-1].append(row["cof"])
 
@@ -113,16 +113,28 @@ def write_spss_file(data):
             writer.writerow(['sub'+str(i+1), data[i][0], data[i][1], data[i][2], data[i][3], data[i][4], data[i][5]])
 
 
+def write_amp_subject_file(data, amp):
+    analytical_file = 'analytical_data/amp_subject/振幅'+str(amp)+ "の動摩擦係数データ_n="+ str(len(data))+"_"+str(datetime.now(timezone('Asia/Tokyo')))+'.csv'
+
+    with open(analytical_file,'a') as f:
+        writer = csv.writer(f)
+        #writer.writerow(['sub_num','amp0','amp0.5','amp1','amp1.5','amp2.0','amp2.5'])
+        for i in range(len(data)):
+            writer.writerow(data)
+
+
 
 #グラフ作成のテスト
 #f_p = glob.glob("data/sub1_amp_0_us_0_no_1010.xlsx")
 #df = pd.read_excel(f_p)
+'''
 f_p = glob.glob("data/sub1_amp_0_us_0_no_1010.xlsx")
 df = pd.read_excel(f_p[0])
 plt.figure()
 df.plot()
 plt.show()
 plt.close('all')
+'''
 
 
 
@@ -150,13 +162,20 @@ average_datas = [[0, 0, 0, 0, 0, 0]  for i in range(10)]
 #sub1から10まで順番にファイルパスを取得
 #5試行分のデータの分析が終了したら平均値を求める
 five_times_data = []
+all_coefficient = []
 count = 0
+#300試行の主観評価データ
+all_subject_evaluation = []
 for i in range(sub_num):
     for l in range(len(amp_order)):
         file = glob.glob("data/sub" + str(i+1) + "_amp_" + amp_order[l] + '_*')
-        file_names.append(file)
         for n in range(len(file)):
-            five_times_data.append(analyze_data(file[n]))
+            file_names.append(file[n])
+            all_subject_evaluation.append(file[n].split('_')[4])
+            cof_temp = analyze_data(file[n]) #動摩擦係数を計算
+            average_cof_temp =sum(cof_temp)/len(cof_temp)
+            all_coefficient.append(average_cof_temp)#sum(all_arr)/len(all_arr)
+            five_times_data.append(cof_temp)
             count += 1
             print("分析中:" + str(count)+"/300")
         connected_data = list(itertools.chain.from_iterable(five_times_data))
@@ -167,6 +186,26 @@ for i in range(sub_num):
         five_times_data = []
 
 print(average_datas)
+
+
+#amp-subject(振幅-主観評価)のcsvファイルを作成
+amp_subject_data = []
+for i in range(len(file_names)):
+    spl = file_names[i].split('_')
+    #temp_data[sub番号, 振幅, 主観評価, ファイル番号, 動摩擦係数]
+    amp_subject_data.append([spl[0],spl[2],spl[4],spl[6], all_coefficient[i]])
+
+
+analytical_file = 'analytical_data/amp_subject/amp_subject_front'+str(front)+'_back'+str(back)+str(datetime.now(timezone('Asia/Tokyo')))+'.csv'
+with open(analytical_file,'a') as f:
+    writer = csv.writer(f)
+    writer.writerow(['sub_num', 'amp', 'subject_ev', 'file_num', 'coefficient'])
+    for i in range(len(amp_subject_data)):
+        writer.writerow(amp_subject_data[i])
+        print("分析中:" + str(i)+"/"+str(len(amp_subject_data)))
+
+
+
 
 
 write_spss_file(average_datas)
